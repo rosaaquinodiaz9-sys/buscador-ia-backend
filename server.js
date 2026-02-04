@@ -1,38 +1,44 @@
-import express from "express";
-import fetch from "node-fetch";
-import cors from "cors";
-import dotenv from "dotenv";
+const express = require("express");
+const fetch = require("node-fetch");
+const cors = require("cors");
 
-dotenv.config();
 const app = express();
+const PORT = process.env.PORT || 4000;
+
 app.use(cors());
 app.use(express.json());
 
 app.post("/api/chat", async (req, res) => {
-  const { mensaje } = req.body;
-
   try {
+    const { mensaje } = req.body;
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_KEY}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: mensaje }],
-        max_tokens: 500
+        messages: [
+          { role: "system", content: "Eres UltraGPT, un asistente inteligente." },
+          { role: "user", content: mensaje }
+        ]
       })
     });
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || "No hay respuesta";
-    res.json({ respuesta: reply });
-  } catch (error) {
-    console.error(error);
-    res.json({ respuesta: "Error con OpenAI ❌" });
+    res.json({ respuesta: data.choices[0].message.content });
+
+  } catch (e) {
+    res.status(500).json({ error: "Error del servidor" });
   }
 });
 
-const port = process.env.PORT || 4000;
-app.listen(port, () => console.log(`Servidor corriendo en puerto ${port} ✅`));
+app.get("/", (req, res) => {
+  res.send("UltraGPT backend activo ✅");
+});
+
+app.listen(PORT, () => {
+  console.log("Servidor corriendo ✔️");
+});
