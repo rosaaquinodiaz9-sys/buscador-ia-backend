@@ -1,4 +1,3 @@
-// server.js — Backend seguro para OpenAI
 import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
@@ -35,4 +34,5 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("Servidor corriendo ✅"));
+const port = process.env.PORT || 4000;
+app.listen(port, () => console.log(`Servidor corriendo en puerto ${port} ✅`));
